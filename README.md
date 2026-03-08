@@ -1,18 +1,235 @@
-# Kigali City Services – Documentation Index
+# Kigali City Services & Places Directory
 
-Start here for implementation. Read in order when building the app.
+A Flutter mobile application that helps Kigali residents find and navigate to essential public services and lifestyle locations—hospitals, police stations, libraries, utility offices, restaurants, cafés, parks, and tourist attractions. The app uses Firebase Authentication and Cloud Firestore for backend integration, with clean architecture and Riverpod for state management.
 
-| Document | Description |
-|----------|-------------|
-| [00_ARCHITECTURE_AND_OVERVIEW.md](00_ARCHITECTURE_AND_OVERVIEW.md) | Clean architecture, folder structure, tech stack (Firebase, Riverpod, flutter_map + OSM + Overpass), Firestore schema, navigation map. |
-| [01_STAGE_1_PROJECT_SETUP.md](01_STAGE_1_PROJECT_SETUP.md) | Dependencies, Firebase setup, folder scaffolding, theme, router shell, main.dart bootstrap. |
-| [02_STAGE_2_AUTHENTICATION.md](02_STAGE_2_AUTHENTICATION.md) | Sign up, login, logout, email verification, Firestore user profile, auth providers and routing. |
-| [03_STAGE_3_LISTINGS_DOMAIN_AND_DATA.md](03_STAGE_3_LISTINGS_DOMAIN_AND_DATA.md) | Listing entity, ListingRepository interface, Firestore collection and repository implementation. |
-| [04_STAGE_4_STATE_MANAGEMENT_AND_CRUD.md](04_STAGE_4_STATE_MANAGEMENT_AND_CRUD.md) | Riverpod providers (streams, filters, detail, my listings), CRUD notifiers, invalidation. |
-| [05_STAGE_5_DIRECTORY_AND_NAVIGATION.md](05_STAGE_5_DIRECTORY_AND_NAVIGATION.md) | Bottom nav shell, Directory screen (search + category filter), My Listings screen, listing form. |
-| [06_STAGE_6_DETAIL_PAGE_AND_MAPS.md](06_STAGE_6_DETAIL_PAGE_AND_MAPS.md) | Listing detail screen, embedded flutter_map (OSM), “Get directions” (url_launcher). |
-| [07_STAGE_7_MAP_VIEW_SETTINGS_AND_POLISH.md](07_STAGE_7_MAP_VIEW_SETTINGS_AND_POLISH.md) | Map View (Firestore + Overpass POIs), Settings (profile + notification toggle), README, Implementation Reflection, Design Summary. |
-| [IMPLEMENTATION_REFLECTION.md](IMPLEMENTATION_REFLECTION.md) | Template: Firebase integration experience, challenges, error screenshots and resolutions. |
-| [DESIGN_SUMMARY.md](DESIGN_SUMMARY.md) | Template: Firestore structure, listing model, state management, trade-offs (1–2 pages). |
+---
 
-**Implementation order:** Stage 1 → 2 → 3 → 4 → 5 → 6 → 7. Fill in Implementation Reflection and Design Summary during or after Stage 7.
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
+- [Running the App](#running-the-app)
+- [Firebase Configuration](#firebase-configuration)
+- [Firestore Structure](#firestore-structure)
+- [State Management & Navigation](#state-management--navigation)
+- [Maps & Directions](#maps--directions)
+- [Documentation](#documentation)
+- [License](#license)
+
+---
+
+## Features
+
+- **Authentication** – Sign up and log in with email/password; email verification required before using the app; user profiles stored in Firestore.
+- **Location listings (CRUD)** – Create, read, update, and delete service/place listings. Each listing includes name, category, address, contact, description, coordinates, and creator. Only the creator can edit or delete their listings.
+- **Directory** – Browse all listings with search by name and filter by category (Hospital, Police Station, Library, Restaurant, Café, Park, Tourist Attraction, etc.). Results update in real time as Firestore data changes.
+- **Detail page** – View full listing details with an embedded open-source map and a “Get directions” button that opens Google Maps or OpenStreetMap for turn-by-turn navigation.
+- **Map view** – Full-screen map showing both user-created listings and OpenStreetMap (OSM) points of interest, so the map is not limited to user-generated content.
+- **My Listings** – Manage listings you created: add new ones, edit, or delete.
+- **Settings** – View and edit profile; toggle for location-based notifications (stored locally as a simulation).
+
+---
+
+## Tech Stack
+
+| Area | Technology |
+|------|------------|
+| **Framework** | Flutter (Dart SDK ^3.11.0) |
+| **State management** | Riverpod |
+| **Routing** | go_router |
+| **Backend** | Firebase Authentication, Cloud Firestore |
+| **Maps** | flutter_map + OpenStreetMap (no API key for tiles) |
+| **POI data** | Overpass API (via flutter_overpass) for OSM points of interest |
+| **Directions** | url_launcher (opens Google Maps or OSM URLs) |
+| **Location** | geolocator |
+| **Local storage** | shared_preferences (e.g. notification toggle) |
+
+---
+
+## Architecture
+
+The app follows **clean architecture** with three layers:
+
+- **Presentation** – Flutter UI and Riverpod providers. No direct Firebase calls; all access via repository interfaces.
+- **Domain** – Entities and repository interfaces (plain Dart, no Flutter/Firebase imports).
+- **Data** – Repository implementations, Firebase Auth, Firestore services, and mappers.
+
+See [docs/00_ARCHITECTURE_AND_OVERVIEW.md](docs/00_ARCHITECTURE_AND_OVERVIEW.md) for details and diagrams.
+
+---
+
+## Project Structure
+
+```
+lib/
+├── main.dart                 # Bootstrap: Firebase init, ProviderScope, App
+├── app.dart                  # MaterialApp, theme, router
+├── firebase_options.dart     # Generated by FlutterFire CLI (not in git)
+├── core/
+│   ├── constants/            # App constants (e.g. OSM User-Agent)
+│   ├── theme/                # AppTheme
+│   ├── router/               # GoRouter config
+│   ├── errors/               # App exceptions
+│   └── utils/                # Helpers
+└── features/
+    ├── auth/                 # Authentication (domain, data, presentation)
+    ├── listings/             # Listings CRUD, directory, detail, map (domain, data, presentation)
+    └── settings/             # Settings screen and providers
+```
+
+---
+
+## Prerequisites
+
+- **Flutter SDK** – Compatible with Dart 3.11+. Install from [flutter.dev](https://docs.flutter.dev/get-started/install).
+- **Firebase account** – [Firebase Console](https://console.firebase.google.com).
+- **Dart global bin on PATH** – So the FlutterFire CLI can be run. Add to your shell config (e.g. `~/.zshrc`):
+  ```bash
+  export PATH="$PATH:$HOME/.pub-cache/bin"
+  ```
+- **Android** – Android Studio or SDK; minSdk 21 (already set in the project).
+- **iOS** – Xcode and CocoaPods (for iOS/macOS builds).
+
+---
+
+## Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd kigali_city_services
+```
+
+### 2. Install dependencies
+
+```bash
+flutter pub get
+```
+
+### 3. Install FlutterFire CLI (one-time)
+
+```bash
+dart pub global activate flutterfire_cli
+```
+
+Ensure `$HOME/.pub-cache/bin` is in your `PATH` (see [Prerequisites](#prerequisites)). Verify:
+
+```bash
+which flutterfire
+```
+
+### 4. Configure Firebase
+
+Firebase config files are **not** committed (they contain keys). You must generate them locally.
+
+1. Create or use an existing Firebase project at [Firebase Console](https://console.firebase.google.com).
+2. In the project:
+   - Enable **Authentication** → **Email/Password** sign-in.
+   - Create a **Firestore Database** (start in test mode for development; add security rules before production).
+3. From the project root, run:
+
+   ```bash
+   flutterfire configure
+   ```
+
+4. When prompted:
+   - Select your Firebase project.
+   - Choose platforms (e.g. **Android** and **iOS**; if you select Web and see an error, run again and select only Android and iOS).
+   - Confirm overwriting `lib/firebase_options.dart` if it exists.
+
+This generates:
+
+- `lib/firebase_options.dart`
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist` (and similar for other selected platforms)
+
+**Note:** If the CLI fails with an error related to “web”, run `flutterfire configure` again and select only **Android** and **iOS**.
+
+### 5. iOS (CocoaPods)
+
+If you plan to run on iOS or macOS:
+
+```bash
+cd ios && pod install && cd ..
+```
+
+### 6. Verify setup
+
+```bash
+flutter analyze
+flutter run
+```
+
+The app should start and show the placeholder or main UI. Sign-in and Firestore will work only after the auth and listings features are implemented and Firebase is configured as above.
+
+---
+
+## Running the App
+
+- **Default device:**
+  ```bash
+  flutter run
+  ```
+- **Specific device:**
+  ```bash
+  flutter devices
+  flutter run -d <device-id>
+  ```
+- **Release build (e.g. Android):**
+  ```bash
+  flutter build apk
+  ```
+
+---
+
+## Firebase Configuration
+
+- **Authentication** – Email/Password only. Email verification is required before users can use the main app.
+- **Firestore** – Used for user profiles (`users/{uid}`) and listings (`listings/{listingId}`). Security rules should restrict reads/writes as described in [Firestore Structure](#firestore-structure) and in [docs/00_ARCHITECTURE_AND_OVERVIEW.md](docs/00_ARCHITECTURE_AND_OVERVIEW.md).
+
+Do **not** commit `firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist`, or `firebase.json`; they are listed in `.gitignore`.
+
+---
+
+## Firestore Structure
+
+- **`users/{uid}`** – User profile (email, displayName, emailVerified, createdAt). Read/write only for `request.auth.uid`.
+- **`listings/{listingId}`** – Name, category, address, contactNumber, description, latitude, longitude, createdBy, timestamp. All authenticated users can read; create requires `createdBy == request.auth.uid`; update/delete only when `resource.data.createdBy == request.auth.uid`.
+
+Composite indexes may be required for queries (e.g. by `category`, by `createdBy`). Create them in the Firebase Console when prompted by the first run of a query.
+
+---
+
+## State Management & Navigation
+
+- **State** – Riverpod. All Firestore and Auth access goes through repository interfaces exposed via providers. The UI never calls Firebase directly.
+- **Navigation** – go_router. Bottom navigation has four tabs: **Directory**, **My Listings**, **Map View**, **Settings**. Unauthenticated users are redirected to login/sign-up; unverified users to the verify-email screen.
+
+---
+
+## Maps & Directions
+
+- **In-app map** – flutter_map with OpenStreetMap tiles (no API key). Set a valid User-Agent for OSM (see `lib/core/constants/app_constants.dart`).
+- **POIs** – User-created listings from Firestore plus points of interest from the Overpass API (flutter_overpass) so the map is not limited to user-generated content.
+- **Directions** – “Get directions” opens a URL (Google Maps or OpenStreetMap) via url_launcher for turn-by-turn navigation; no in-app API key required for that.
+
+---
+
+## Documentation
+
+Implementation is split into stages. Start with the docs index:
+
+- **[docs/README.md](docs/README.md)** – Index of all implementation docs.
+- **[docs/00_ARCHITECTURE_AND_OVERVIEW.md](docs/00_ARCHITECTURE_AND_OVERVIEW.md)** – Architecture, folder structure, Firestore schema, navigation.
+- **Stage guides** – [01](docs/01_STAGE_1_PROJECT_SETUP.md) through [07](docs/07_STAGE_7_MAP_VIEW_SETTINGS_AND_POLISH.md) for setup, auth, listings, state, UI, maps, and polish.
+
+---
+
+## License
+
+This project is for educational use. See the repository or course materials for license terms.

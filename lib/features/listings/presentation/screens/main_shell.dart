@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../settings/presentation/screens/settings_placeholder_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 import 'directory_screen.dart';
-import 'map_view_placeholder_screen.dart';
+import 'map_view_screen.dart';
 import 'my_listings_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -31,8 +31,8 @@ class _MainShellState extends State<MainShell> {
         children: const [
           DirectoryScreen(),
           MyListingsScreen(),
-          MapViewPlaceholderScreen(),
-          SettingsPlaceholderScreen(),
+          MapViewScreen(),
+          SettingsScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

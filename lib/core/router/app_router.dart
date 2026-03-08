@@ -5,6 +5,7 @@ import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/listings/presentation/screens/listing_detail_screen.dart';
 import '../../features/listings/presentation/screens/listing_form_screen.dart';
 import '../../features/listings/presentation/screens/main_shell.dart';
@@ -14,7 +15,7 @@ import 'auth_refresh_notifier.dart';
 /// redirect and refreshListenable so route updates when auth state changes.
 GoRouter createAppRouter(AuthRefreshNotifier authNotifier) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/welcome',
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final auth = authNotifier.value;
@@ -22,14 +23,14 @@ GoRouter createAppRouter(AuthRefreshNotifier authNotifier) {
         data: (AuthUser? user) {
           final path = state.uri.path;
           if (user == null) {
-            if (path == '/login' || path == '/sign-up') return null;
-            return '/login';
+            if (path == '/welcome' || path == '/login' || path == '/sign-up') return null;
+            return '/welcome';
           }
           if (!user.emailVerified) {
             if (path == '/verify-email') return null;
             return '/verify-email';
           }
-          if (path == '/login' || path == '/sign-up' || path == '/verify-email') {
+          if (path == '/welcome' || path == '/login' || path == '/sign-up' || path == '/verify-email') {
             return '/';
           }
           return null;
@@ -39,6 +40,10 @@ GoRouter createAppRouter(AuthRefreshNotifier authNotifier) {
       );
     },
     routes: [
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const WelcomeScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),

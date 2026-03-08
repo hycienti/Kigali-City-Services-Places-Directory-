@@ -26,17 +26,46 @@ class MyListingsScreen extends ConsumerWidget {
         data: (list) {
           if (list.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('You have no listings yet.'),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () => context.push('/listing/new'),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add listing'),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.folder_open,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'You have no listings yet',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tap + to add your first listing.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/listing/new'),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add listing'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.accent,
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -82,9 +111,12 @@ class MyListingsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        ),
         title: const Text('Delete listing?'),
         content: const Text(
-          'This cannot be undone.',
+          'This listing will be permanently deleted. This cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -93,6 +125,9 @@ class MyListingsScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             child: const Text('Delete'),
           ),
         ],

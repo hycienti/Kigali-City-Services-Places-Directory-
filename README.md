@@ -220,6 +220,12 @@ Composite indexes may be required for queries (e.g. by `category`, by `createdBy
 
 ---
 
+## Screenshots
+
+Add screenshots of the main screens (Directory, My Listings, Map View, Settings, Listing detail) here.
+
+---
+
 ## Documentation
 
 Implementation is split into stages. Start with the docs index:

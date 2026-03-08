@@ -68,7 +68,6 @@ class FirebaseAuthRepository implements AuthRepository {
 
       await user.sendEmailVerification();
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('FirebaseAuthException: ${e.code}');
       throw AuthException(_messageFromFirebaseCode(e.code), e.code);
     }
   }
@@ -96,9 +95,7 @@ class FirebaseAuthRepository implements AuthRepository {
     if (user == null) throw const AuthException('No user signed in');
     try {
       await user.sendEmailVerification();
-      print('Email verification sent');
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('FirebaseAuthException: ${e.code}');
       throw AuthException(_messageFromFirebaseCode(e.code), e.code);
     }
   }

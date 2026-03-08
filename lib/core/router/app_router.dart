@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +5,9 @@ import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
+import '../../features/listings/presentation/screens/listing_detail_screen.dart';
+import '../../features/listings/presentation/screens/listing_form_screen.dart';
+import '../../features/listings/presentation/screens/main_shell.dart';
 import 'auth_refresh_notifier.dart';
 
 /// Builds the app router with auth redirect. [authNotifier] is used by
@@ -51,10 +53,22 @@ GoRouter createAppRouter(AuthRefreshNotifier authNotifier) {
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Kigali City Services – Placeholder'),
-          ),
+        builder: (context, state) => const MainShell(),
+      ),
+      GoRoute(
+        path: '/listing/new',
+        builder: (context, state) => const ListingFormScreen(),
+      ),
+      GoRoute(
+        path: '/listing/edit/:id',
+        builder: (context, state) => ListingFormScreen(
+          listingId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: '/listing/:id',
+        builder: (context, state) => ListingDetailScreen(
+          listingId: state.pathParameters['id'] ?? '',
         ),
       ),
     ],

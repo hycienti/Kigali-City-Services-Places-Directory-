@@ -23,6 +23,10 @@ abstract class AuthRepository {
 
   Future<void> sendEmailVerification();
 
+  /// Reloads the current user from the server (e.g. to refresh [AuthUser.emailVerified])
+  /// and returns the updated user. Implementations may also emit this user to [authStateChanges].
+  Future<AuthUser?> reloadCurrentUser();
+
   Future<UserProfile?> getUserProfile(String uid);
 
   Future<void> createOrUpdateUserProfile(UserProfile profile);

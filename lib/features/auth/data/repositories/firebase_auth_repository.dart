@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
@@ -13,16 +15,23 @@ class FirebaseAuthRepository implements AuthRepository {
     firebase_auth.FirebaseAuth? auth,
     FirebaseFirestore? firestore,
   }) : _auth = auth ?? firebase_auth.FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance;
+       _firestore = firestore ?? FirebaseFirestore.instance {
+    _auth.authStateChanges().listen((user) {
+      _authStateController.add(_authUserFromFirebaseUser(user));
+    });
+  }
 
   final firebase_auth.FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final _authStateController = StreamController<AuthUser?>.broadcast();
 
   static const String _usersCollection = 'users';
 
   @override
-  Stream<AuthUser?> get authStateChanges =>
-      _auth.authStateChanges().map(_authUserFromFirebaseUser);
+  Stream<AuthUser?> get authStateChanges async* {
+    yield await currentUser;
+    yield* _authStateController.stream;
+  }
 
   @override
   Future<AuthUser?> get currentUser async {
@@ -98,6 +107,16 @@ class FirebaseAuthRepository implements AuthRepository {
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(_messageFromFirebaseCode(e.code), e.code);
     }
+  }
+
+  @override
+  Future<AuthUser?> reloadCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+    await user.reload();
+    final updated = _authUserFromFirebaseUser(_auth.currentUser);
+    _authStateController.add(updated);
+    return updated;
   }
 
   @override

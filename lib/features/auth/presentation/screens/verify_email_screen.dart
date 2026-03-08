@@ -15,6 +15,7 @@ class VerifyEmailScreen extends ConsumerStatefulWidget {
 
 class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   bool _isSending = false;
+  bool _isChecking = false;
   String? _message;
   bool _isError = false;
 
@@ -50,9 +51,30 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   }
 
   Future<void> _checkVerified() async {
-    final user = ref.read(currentUserProvider);
-    if (user != null && user.emailVerified) {
-      if (mounted) context.go('/');
+    setState(() {
+      _message = null;
+      _isChecking = true;
+    });
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      final user = await repo.reloadCurrentUser();
+      if (!mounted) return;
+      setState(() => _isChecking = false);
+      if (user != null && user.emailVerified) {
+        if (mounted) context.go('/');
+      } else {
+        setState(() {
+          _message = 'Email not verified yet. Click the link in the email and try again.';
+          _isError = true;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _message = 'Failed to check. Try again.';
+        _isError = true;
+        _isChecking = false;
+      });
     }
   }
 
@@ -115,8 +137,14 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: _checkVerified,
-                child: const Text("I've verified my email"),
+                onPressed: _isChecking ? null : _checkVerified,
+                child: _isChecking
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text("I've verified my email"),
               ),
             ],
           ),

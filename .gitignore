@@ -45,6 +45,7 @@ app.*.map.json
 /android/app/release
 
 # Firebase / Google API keys and config (do not commit to public repos)
+firebase.json
 lib/firebase_options.dart
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
